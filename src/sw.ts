@@ -26,7 +26,7 @@ chrome.runtime.onMessage.addListener((msg, _, respond) => {
 					msg.articleBodyHtml
 						.replace(/<div id="defaultImage">[^]*?<\/div>/, '') // 짤방 제거
 				)
-		const mhtml = await mhtmlFromHtml(msg.url, msg.protocol, html)
+		const mhtml = await mhtmlFromHtml(msg.url, html)
 		const url = await blobToDataUrl(new Blob([mhtml], { type: 'multipart/related' }))
 		await chrome.downloads.download({
 			url,

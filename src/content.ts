@@ -4,7 +4,6 @@ chrome.runtime.onMessage.addListener(msg => {
 	chrome.runtime.sendMessage({
 		type: 'sw-download',
 		url: location.href,
-		protocol: location.protocol,
 		articleId: location.pathname.split('/').at(-1),
 		articleBodyHtml:
 			document.querySelector('.article-body')
