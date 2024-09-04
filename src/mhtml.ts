@@ -1,6 +1,6 @@
 const BOUNDARY = '--boundary--'
 
-export const fromHtml = async (url: string, protocol: string, html: string) => {
+export const fromHtml = async (url: string, html: string) => {
 	const lines = [
 		`Snapshot-Content-Location: ${url}`,
 		'MIME-Version: 1.0',
@@ -10,7 +10,7 @@ export const fromHtml = async (url: string, protocol: string, html: string) => {
 	
 	lines.push(...serializeResourceIncludeBoundary('text/html', null, url, makeHtmlAsciiOnlyAndUseCrlf(html)))
 	
-	const resources = await extractResources(html, protocol)
+	const resources = await extractResources(html, new URL(url))
 	
 	for (const [oldUrl, newUrl] of resources) {
 		html = html.replaceAll(oldUrl, newUrl)
@@ -44,18 +44,22 @@ const serializeResourceIncludeBoundary = (contentType: string, transferEncoding:
 	]
 }
 
-const makeProtocolExplicit = (url: string, protocol: string) =>
-	// protocol-relative URL
-	url.startsWith('//') ? protocol + url : url
-const extractResourceUrls = (html: string, protocol: string) =>
-	[...html.matchAll(/(?:<a href="([^"]+?)"[^>]*>\s*)?(?<=<(?:video|img)[^>]*\bsrc=")(.+?)(?=")/g)]
-		.map(([origUrl, url]) => [
-			url,
-			makeProtocolExplicit(origUrl ?? url, protocol),
-		] as const)
-const extractResources = (html: string, protocol: string) =>
+const makeUrlExplicit = (url: string, rootUrl: URL) => {
+	if (url.startsWith('//')) return rootUrl.protocol + url
+	if (url.startsWith('/')) return rootUrl.origin + url
+	return url
+}
+const extractResourceUrls = (html: string, rootUrl: URL) =>
+	[...new Map( // 같은 url은 한번만 나오도록
+		[...html.matchAll(/(?:<a href="([^"]+?)"[^>]*>\s*)?(?<=<(?:video|img)[^>]*\bsrc=")(.+?)(?=")/g)]
+			.map(([origUrl, url]) => [
+				url,
+				[url, makeUrlExplicit(origUrl ?? url, rootUrl)],
+			] as const)
+	).values()]
+const extractResources = (html: string, rootUrl: URL) =>
 	Promise.all(
-		extractResourceUrls(html, protocol)
+		extractResourceUrls(html, rootUrl)
 			.map(async ([oldUrl, renderingUrl]) => [
 				oldUrl,
 				renderingUrl,
