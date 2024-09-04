@@ -11,7 +11,7 @@ const main = () => {
 		if (!isTarget(sel)) continue
 		
 		if (isGlobalSelector(sel)) sel = reduceGlobalSelector(sel)
-		else if (isArticleContentSelector(sel)) sel = reduceArticleContentSelector(sel)
+		sel = removeOutScopedSelector(sel)
 		body = reduceRuleBody(body)
 		
 		res += `${sel}{${body}}`
@@ -54,11 +54,14 @@ const isSeriesSelector = sel =>
 	sel.includes('series')
 const isGlobalSelector = sel =>
 	/^[\w\[]/.test(sel)
+const isTwemojiSelector = sel =>
+	sel.includes('.twemoji')
 const isTarget = sel =>
 	(sel == 'html' || !sel.includes('html')) && (
 		isGlobalSelector(sel)
 			|| isArticleContentSelector(sel)
 			|| isSeriesSelector(sel)
+			|| isTwemojiSelector(sel)
 	)
 
 const reduceGlobalSelector = sel => {
@@ -66,7 +69,7 @@ const reduceGlobalSelector = sel => {
 	if (m) return m[1]
 	else return sel
 }
-const reduceArticleContentSelector = sel =>
+const removeOutScopedSelector = sel =>
 	sel
 		.replace(/\.(body|board-article) /g, '')
 		.replace(/^\.body$/, 'body')

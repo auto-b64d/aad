@@ -1,7 +1,7 @@
 {
 	"manifest_version": 3,
 	"name": "aad",
-	"version": "1.1",
+	"version": "1.2",
 	"permissions": ["downloads"],
 	"host_permissions": ["https://arca.live/*", "https://*.namu.la/*"],
 	"action": {

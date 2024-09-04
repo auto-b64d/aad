@@ -516,3 +516,10 @@ mark,.mark {
 	margin-bottom: .5rem;
 	display: inline-block
 }
+
+.body img.twemoji {
+	display: inline;
+	width: 1.1em;
+	height: 1.1em;
+	user-select: text
+}
