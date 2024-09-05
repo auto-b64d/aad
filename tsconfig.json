@@ -4,6 +4,7 @@
 		"module": "ESNext",
 		"noEmitOnError": true,
 		"outDir": "dist",
+		"removeComments": true,
 		"strict": true,
 		"target": "ESNext",
 	},
