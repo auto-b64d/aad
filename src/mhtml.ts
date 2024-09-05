@@ -8,8 +8,6 @@ export const fromHtml = async (url: string, html: string) => {
 		'',
 	]
 	
-	lines.push(...serializeResourceIncludeBoundary('text/html', null, url, makeHtmlAsciiOnlyAndUseCrlf(html)))
-	
 	const resources = await extractResources(html, new URL(url))
 	
 	for (const [oldUrl, newUrl] of resources) {
@@ -17,6 +15,7 @@ export const fromHtml = async (url: string, html: string) => {
 	}
 	
 	lines.push(
+		...serializeResourceIncludeBoundary('text/html', null, url, makeHtmlAsciiOnlyAndUseCrlf(html)),
 		...await Promise.all(
 			resources.map(async ([_, url, blob]) => {
 				const base64 = await blobToBase64(blob)
@@ -52,7 +51,7 @@ const makeUrlExplicit = (url: string, rootUrl: URL) => {
 const extractResourceUrls = (html: string, rootUrl: URL) =>
 	[...new Map( // 같은 url은 한번만 나오도록
 		[...html.matchAll(/(?:<a href="([^"]+?)"[^>]*>\s*)?(?<=<(?:video|img)[^>]*\bsrc=")(.+?)(?=")/g)]
-			.map(([origUrl, url]) => [
+			.map(([_, origUrl, url]) => [
 				url,
 				[url, makeUrlExplicit(origUrl ?? url, rootUrl)],
 			] as const)
