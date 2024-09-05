@@ -4,6 +4,8 @@ const main = () => {
 	const css = fs.readFileSync('style.css', 'utf-8')
 		.replace(/\/\*[^]*?\*\//g, '') // 주석 제거
 	const rules = [...css.matchAll(/(?<=^|\n)([^{\s][^{]*?)\s*{([^}]+?)}/g)]
+	// [1]: 셀렉터 (줄이 공백이나 여는 중괄호로 시작하지 않으면 됨)
+	// [2]: 중괄호 안의 몸체
 
 	let res = ''
 
@@ -64,11 +66,8 @@ const isTarget = sel =>
 			|| isTwemojiSelector(sel)
 	)
 
-const reduceGlobalSelector = sel => {
-	const m = sel.match(/^(\w+),\.\1$/)
-	if (m) return m[1]
-	else return sel
-}
+const reduceGlobalSelector = sel =>
+	sel.match(/^(\w+),\.\1$/)?.[1] ?? sel
 const removeOutScopedSelector = sel =>
 	sel
 		.replace(/\.(body|board-article) /g, '')
