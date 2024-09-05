@@ -12,6 +12,9 @@ const HTML_TEMPLATE = `
 	</html>
 `
 
+const escapeFileName = (fileName: string) =>
+	fileName.replace(/[\\/:*?"<>|]/g, '_')
+
 chrome.runtime.onMessage.addListener((msg, _, respond) => {
 	if (msg.type != 'sw-download') return respond()
 	
@@ -30,7 +33,7 @@ chrome.runtime.onMessage.addListener((msg, _, respond) => {
 		const url = await blobToDataUrl(new Blob([mhtml], { type: 'multipart/related' }))
 		await chrome.downloads.download({
 			url,
-			filename: `${msg.articleId} - ${msg.articleTitle}.mhtml`,
+			filename: `${msg.articleId} - ${escapeFileName(msg.articleTitle)}.mhtml`,
 			conflictAction: 'uniquify',
 		})
 		respond()
